@@ -1,0 +1,1 @@
+# YoRHa-Spicetify-theme
