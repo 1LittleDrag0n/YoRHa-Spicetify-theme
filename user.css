@@ -340,7 +340,7 @@ img[src*="equaliser"] {
 
 /* background image */
 .Root__top-container {
-    background-image: url("https://github.com/1LittleDrag0n/YoRHa-Spicetify-theme/blob/main/imgs/light-theme-1080.png") !important;
+    background-image: url("https://raw.githubusercontent.com/1LittleDrag0n/YoRHa-Spicetify-theme/main/imgs/light-theme-1080.png") !important;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
