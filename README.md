@@ -8,7 +8,7 @@
 
 A Nier Automata YoRHa-themed skin for Spicetify.
 
-![preview 1](https://raw.githubusercontent.com/1LittleDrag0n/YoRHa-Stylus-theme/main/Previews/prvw1.png)
+![preview 1](https://raw.githubusercontent.com/1LittleDrag0n/YoRHa-Spicetify-theme/main/Previews/prvw1.png?raw=true)
 
 ---
 
