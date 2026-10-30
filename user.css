@@ -63,6 +63,12 @@
     --border-transition: 0.2s ease; /* 'none' to disable  */
 
     --global-nav-margin-top: 50px; /* set to '0px' if you disabled window controls */
+
+    /* performance toggles */
+    --pane-backdrop: blur(4px); /* 'none' = no pane blur (biggest speed win) */
+    --text-glow: 0 1px 3px rgba(61, 56, 46, 0.8); /* 'none' = no text shadow */
+    --display-noise: block; /* none | block - film grain on main pane */
+    --display-crt-overlay: block; /* none | block - scanlines, grid, vignette */
 }
 
 /* font */
@@ -80,7 +86,7 @@ body,
 .Root__nav-bar,
 .Root__now-playing-bar {
     color: var(--spice-text);
-    text-shadow: 0 1px 3px rgba(61, 56, 46, 0.8);
+    text-shadow: var(--text-glow);
 }
 /* dark gold accent elements */
 .main-trackList-playingIcon,
@@ -344,7 +350,7 @@ img[src*="equaliser"] {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-attachment: scroll; /* was fixed - same look, container fills the window anyway */
 }
 .progress-bar {
     --fg-color: var(--spice-button-active);
@@ -402,9 +408,9 @@ div[style*="--text-subdued: rgba(255, 255, 255, 0.7);"] {
     border-color: var(--spice-border-inactive);
     border-radius: var(--border-radius);
     background-color: rgba(36, 34, 29, 0.15) !important;
-    backdrop-filter: blur(4px);
+    backdrop-filter: var(--pane-backdrop);
     box-shadow: 0 0 0 1px rgba(107, 90, 46, 0.15), inset 0 0 60px rgba(255,255,255,0.08);
-    transition: border-color var(--border-transition), box-shadow var(--border-transition);
+    transition: border-color var(--border-transition);
 }
 .Root__globalNav:hover,
 .main-yourLibraryX-entryPoints:hover,
@@ -601,10 +607,14 @@ select:focus {
     width: 100%;
 }
 .x-searchInput-searchInputInput,
-.main-globalNav-searchContainer form .main-topBar-searchBar {
-    border-radius: var(--border-radius);
-    border: 1px solid;
-    border-color: var(--spice-main);
+.main-globalNav-searchContainer form .main-topBar-searchBar,
+[class*="searchInput"],
+[data-testid="search-input"],
+input[type="search"],
+.main-topBar-searchBar {
+    border-radius: 0 !important;
+    border: 1px solid var(--spice-border-inactive) !important;
+    background-color: rgba(36, 34, 29, 0.4) !important;
 }
 .x-searchInput-searchInputInput:hover,
 .x-searchInput-searchInputInput:focus,
@@ -1061,70 +1071,22 @@ button:has(
  * CRT / YORHA OVERLAY EFFECTS
  * ================================ */
 
-/* ── scanlines ── */
+/* All four overlays (scanlines, grid, vignette, top beam line) merged into
+ * ONE full-screen layer instead of four - same look, far less compositing.
+ * Toggle with --display-crt-overlay in :root. */
 .Root__top-container::after {
     content: '';
     position: fixed;
     inset: 0;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(90, 70, 30, 0.06) 3px,
-        rgba(90, 70, 30, 0.06) 4px
-    );
+    display: var(--display-crt-overlay);
+    background:
+        linear-gradient(90deg, transparent 0%, rgba(107, 90, 46, 0.15) 30%, rgba(74, 61, 30, 0.25) 50%, rgba(107, 90, 46, 0.15) 70%, transparent 100%) top / 100% 4px no-repeat,
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(90, 70, 30, 0.06) 3px, rgba(90, 70, 30, 0.06) 4px),
+        linear-gradient(rgba(107, 90, 46, 0.04) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(90deg, rgba(107, 90, 46, 0.04) 1px, transparent 1px) 0 0 / 48px 48px,
+        radial-gradient(ellipse at center, transparent 15%, rgba(50, 35, 10, 0.45) 100%);
     pointer-events: none;
     z-index: 9999;
-    animation: yorha-scanlines 14s linear infinite;
-}
-
-/* ── grid overlay ── */
-.Root__top-container::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(107, 90, 46, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(107, 90, 46, 0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 9998;
-    animation: yorha-grid-pulse 8s ease-in-out infinite;
-}
-
-/* ── vignette ── */
-body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(
-        ellipse at center,
-        transparent 15%,
-        rgba(50, 35, 10, 0.45) 100%
-    );
-    pointer-events: none;
-    z-index: 9997;
-}
-
-/* ── CRT scan beam ── */
-body::before {
-    content: '';
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 4px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(107, 90, 46, 0.15) 30%,
-        rgba(74, 61, 30, 0.25) 50%,
-        rgba(107, 90, 46, 0.15) 70%,
-        transparent 100%
-    );
-    pointer-events: none;
-    z-index: 9999;
-    animation: yorha-scan-beam 7s linear infinite;
 }
 
 /* ── keyframes ── */
@@ -1136,7 +1098,63 @@ body::before {
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 200px 200px;
+    display: var(--display-noise);
     opacity: 0.22;
     pointer-events: none;
     z-index: 1;
+}
+/* @keyframes yorha-scanlines {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+}
+@keyframes yorha-grid-pulse {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
+}
+@keyframes yorha-scan-beam {
+    0%   { top: -4px; }
+    100% { top: 100vh; }
+} */
+
+/* ================================
+ * SPOTIFY UPDATE FALLBACK SELECTORS
+ * covers renamed classes post-update
+ * ================================ */
+
+/* background image fallback */
+[class*="Root__top-container"] {
+    background-image: url("https://raw.githubusercontent.com/1LittleDrag0n/YoRHa-Spicetify-theme/main/imgs/light-theme-1080.png") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* pane border fallbacks */
+[class*="Root__globalNav"],
+[class*="Root__main-view"],
+[class*="Root__now-playing-bar"],
+[class*="Root__nav-bar"] {
+    border: 1px solid var(--spice-border-inactive) !important;
+    background-color: rgba(36, 34, 29, 0.15) !important;
+}
+
+/* player controls fallback — hide SVGs, show unicode */
+[data-testid^="control-button"] svg,
+[class*="playPauseButton"] svg,
+[class*="skipForwardButton"] svg,
+[class*="skipBackButton"] svg,
+[class*="shuffleButton"] svg,
+[class*="repeatButton"] svg {
+    display: none !important;
+}
+
+/* Main label fix: backdrop-filter traps position:fixed children and clips the label */
+.Root__main-view,
+[class*="Root__main-view"] {
+    backdrop-filter: none !important;
+}
+/* blur moved to the inner container so the label isn't clipped */
+.Root__main-view > .main-view-container,
+.Root__main-view .main-view-container {
+    backdrop-filter: var(--pane-backdrop) !important;
 }
